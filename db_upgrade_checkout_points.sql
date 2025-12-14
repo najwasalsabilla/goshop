@@ -1,0 +1,40 @@
+
+CREATE TABLE IF NOT EXISTS point_transactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT NOT NULL,
+  type ENUM('EARN','REDEEM','ADJUST') NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  points INT NOT NULL,
+  source VARCHAR(50) DEFAULT 'ONLINE',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (customer_id),
+  CONSTRAINT fk_pt_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT NOT NULL,
+  total_amount INT NOT NULL,
+  points_earned INT NOT NULL DEFAULT 0,
+  status ENUM('PAID','CANCELLED') NOT NULL DEFAULT 'PAID',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (customer_id),
+  CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
+  product_id INT NOT NULL,
+  qty INT NOT NULL,
+  price INT NOT NULL,
+  subtotal INT NOT NULL,
+  INDEX (order_id),
+  INDEX (product_id),
+  CONSTRAINT fk_oi_order FOREIGN KEY (order_id) REFERENCES orders(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_oi_product FOREIGN KEY (product_id) REFERENCES products(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
